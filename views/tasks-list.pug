@@ -1,0 +1,23 @@
+    
+body
+    main
+        a(href= '/task/create') add new Task
+        if tasks.length > 0
+            div
+                each task in tasks
+                    article
+                        header
+                            h1= task.name
+                        div
+                            p= task.dueDate
+                        a(href=`/task/edit/${task._id}?edit=true`, class='btn') Edit
+
+                        form(action='/task/delete', method='POST')
+                            input(type='hidden', value=task._id, name='taskId')
+                            button.btn(type='submit') Delete
+
+                    hr
+
+        else
+            h1 No Tasks Found!
+
