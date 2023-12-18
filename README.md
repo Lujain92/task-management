@@ -15,7 +15,7 @@ This is a Task Management System built using Node.js and MongoDB to manage tasks
 
 ## Installation
 
-1. Clone the repository: `git clone https://github.com/lujain92/task-management.git`
+1. Clone the repository: `git clone git@github.com:Lujain92/task-management.git`
 2. Navigate to the project directory: `cd task-management`
 3. Install dependencies: `npm install`
 
