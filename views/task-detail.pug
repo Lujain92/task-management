@@ -1,18 +1,18 @@
-
+block styles
+    link(rel="stylesheet", href="/css/task.css")
 body
     main
-        form(action=`/task/${editing ? 'edit' : 'create'}`, method='POST')
-            div
-                label(for='name') name
-                input(type='text', name='name', id='name', value= editing ? task.name : '')
-            div
-                label(for='checked') checked
-                input(type='checkbox', name='checked', id='checked', value= editing ? task.checked : '')
-            div
-                label(for='dueDate') dueDate
-                input(type='date', name='dueDate', id='dueDate', value= editing ? task.dueDate : '')
+        section
+            h1= task.name
+            h2= task.dueDate
+            div 
+                label(for='checked') status
+                input(type='checkbox', name='checked', id='checked', value='checked', checked=task.checked, disabled)
 
-            if editing
-                input(type='hidden', name='taskId', value=task._id)
+            a(href=`/task/edit/${task._id}?edit=true`, class='btn') Edit
+                      
+            form(action='/task/delete', method='POST', class='form-button')
+                input(type='hidden', value=task._id, name='taskId')
+                button.btn(type='submit') Delete
 
-            button(type='submit')= editing ? 'Update task' : 'Add task'
+    

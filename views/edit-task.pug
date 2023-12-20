@@ -1,0 +1,21 @@
+
+block styles
+    link(rel="stylesheet", href="/css/task.css")
+body
+    main
+        form(action=`/task/${editing ? 'edit' : 'create'}`, method='POST')
+            div
+                label(for='name') name
+                input(type='text', name='name', id='name', value= editing ? task.name : '')
+            div
+                label(for='checked') checked
+                input(type='checkbox', name='checked', id='checked', value='checked', checked=editing ? task.checked : false)
+                
+            div
+                label(for='dueDate') dueDate
+                input(type='date', name='dueDate', id='dueDate', value= editing ? task.dueDate : '')
+
+            if editing
+                input(type='hidden', name='taskId', value=task._id)
+
+            button(type='submit', class='btn')= editing ? 'Update task' : 'Add task'

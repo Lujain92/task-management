@@ -29,10 +29,10 @@ class Task {
       dbOp = db.collection('task').insertOne(this);
     }
     return dbOp
-      .then(result => {
+      .then((result) => {
         console.log(result);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }
@@ -43,11 +43,11 @@ class Task {
    */
   static fetchAll() {
     const db = getDb();
-    return db.collection('task')
+    return db
+      .collection('task')
       .find()
       .toArray()
       .then((tasks) => {
-        console.log(tasks);
         return tasks;
       })
       .catch((err) => {
@@ -62,14 +62,15 @@ class Task {
    */
   static findById(taskId) {
     const db = getDb();
-    return db.collection('task')
+    return db
+      .collection('task')
       .find({ _id: new mongodb.ObjectId(taskId) })
       .next()
-      .then(task => {
+      .then((task) => {
         console.log(task);
         return task;
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }
@@ -81,12 +82,13 @@ class Task {
    */
   static deleteById(taskId) {
     const db = getDb();
-    return db.collection('task')
+    return db
+      .collection('task')
       .deleteOne({ _id: new mongodb.ObjectId(taskId) })
-      .then(result => {
+      .then(() => {
         console.log('Deleted');
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }
