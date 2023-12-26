@@ -5,22 +5,39 @@ jest.mock('../../util/database', () => ({
   getDb: jest.fn(),
 }));
 
+// jest.mock('mongodb', () => ({
+//   ObjectId: jest.fn().mockImplementation((id) => ({ $oid: id })),
+// }));
+
 jest.mock('mongodb', () => ({
-  ObjectId: jest.fn().mockImplementation((id) => ({ $oid: id })),
+  ObjectId: jest.fn((id) => ({ $oid: id })),
 }));
+
 
 describe('Task', () => {
   describe('save()', () => {
+
+    // it('should update an existing task', async () => {
+    //   const existingTask = { _id: 'existingId', title: 'Existing Task', description: 'Old Description' };
+    //   const updateOneMock = jest.fn().mockResolvedValue({ modifiedCount: 1 });
+    //   const collectionMock = jest.fn().mockReturnValue({ updateOne: updateOneMock });
+    //   getDb.mockReturnValue({ collection: collectionMock });
+
+    //   const task = new Task(existingTask);
+      
+    //   await task.save();
+
+    //   expect(getDb).toHaveBeenCalled();
+    //   expect(collectionMock).toHaveBeenCalledWith('task');
+    //   expect(updateOneMock).toHaveBeenCalledWith({ _id: { $oid: 'existingId' } }, { $set: task });
+    // });
 
     it('should insert a new task', async () => {
       const insertOneMock = jest.fn().mockResolvedValue({ insertedCount: 1 });
       const collectionMock = jest.fn().mockReturnValue({ insertOne: insertOneMock });
       getDb.mockReturnValue({ collection: collectionMock });
 
-      const newTask = new Task({
-        title: 'New Task',
-        description: 'New Description',
-      });
+      const newTask = new Task({ title: 'New Task', description: 'New Description' });
 
       await newTask.save();
 
@@ -29,6 +46,20 @@ describe('Task', () => {
       expect(insertOneMock).toHaveBeenCalledWith(newTask);
     });
 
+    // it('should handle errors during save operation', async () => {
+    //   const dbError = new Error('Save error');
+    //   const updateOneMock = jest.fn().mockRejectedValue(dbError);
+    //   const collectionMock = jest.fn().mockReturnValue({ updateOne: updateOneMock });
+    //   getDb.mockReturnValue({ collection: collectionMock });
+
+    //   const task = new Task({ title: 'Test Task' });
+
+    //   await task.save();
+
+    //   expect(getDb).toHaveBeenCalled();
+    //   expect(collectionMock).toHaveBeenCalledWith('task');
+    //   expect(updateOneMock).toHaveBeenCalledWith({ _id: undefined }, { $set: task });
+    // });
   });
 
   describe('fetchAll()', () => {

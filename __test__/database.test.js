@@ -44,6 +44,13 @@ describe('MongoDB Connection', () => {
 
   describe('getDb function', () => {
 
+
+    // it('should getDB  instance', () => {
+    //   _db = mockClient.db;
+
+    //   expect(getDb).toEqual(_db);
+    // });
+
     it('should throw an error if no database instance is found', () => {
       _db = null;
 
