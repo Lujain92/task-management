@@ -3,6 +3,8 @@
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-exports.get404 = (req, res) => {
-    res.status(404).render('404');
-  };
+get404 = (req, res) => {
+  res.status(404).render('404');
+};
+
+module.exports = { get404 };

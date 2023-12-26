@@ -1,18 +1,18 @@
+extends layout
+
 block styles
     link(rel="stylesheet", href="/css/task.css")
-body
-    main
-        section
-            h1= task.name
-            h2= task.dueDate
-            div 
-                label(for='checked') status
-                input(type='checkbox', name='checked', id='checked', value='checked', checked=task.checked, disabled)
 
-            a(href=`/task/edit/${task._id}?edit=true`, class='btn') Edit
-                      
-            form(action='/task/delete', method='POST', class='form-button')
-                input(type='hidden', value=task._id, name='taskId')
-                button.btn(type='submit') Delete
+block content
+    section
+        h1= task.name
+        h2= task.dueDate
+        div 
+            label(for='checked') status
+            input(type='checkbox', name='checked', id='checked', value='checked', checked=task.checked, disabled)
 
-    
+        a(href=`/task/edit/${task._id}?edit=true`, class='btn') Edit
+                  
+        form(action='/task/delete', method='POST', class='form-button')
+            input(type='hidden', value=task._id, name='taskId')
+            button.btn(type='submit') Delete

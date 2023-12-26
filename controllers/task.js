@@ -6,7 +6,7 @@ const Task = require('../models/task');
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-exports.getTasks = (req, res) => {
+getTasks = (req, res) => {
   Task.fetchAll()
     .then((tasks) => {
       console.log(tasks);
@@ -24,7 +24,7 @@ exports.getTasks = (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-exports.getTask = (req, res) => {
+getTask = (req, res) => {
   const taskId = req.params.taskId;
   Task.findById(taskId)
     .then((task) => {
@@ -46,7 +46,7 @@ exports.getTask = (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-exports.deleteTask = (req, res) => {
+deleteTask = (req, res) => {
   const taskId = req.body.taskId;
   Task.deleteById(taskId)
     .then(() => {
@@ -64,7 +64,7 @@ exports.deleteTask = (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-exports.getEditTask = (req, res) => {
+getEditTask = (req, res) => {
   const editMode = req.query.edit;
   if (!editMode) {
     return res.redirect('/task');
@@ -91,7 +91,7 @@ exports.getEditTask = (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-exports.postEditTask = (req, res) => {
+postEditTask = (req, res) => {
   const taskId = req.body.taskId;
   const name = req.body.name;
   const checked = req.body.checked;
@@ -114,7 +114,7 @@ exports.postEditTask = (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-exports.getAddTask = (req, res) => {
+getAddTask = (req, res) => {
   res.render('edit-task');
 };
 
@@ -124,7 +124,7 @@ exports.getAddTask = (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-exports.postAddTask = (req, res) => {
+postAddTask = (req, res) => {
   const name = req.body.name;
   const checked = req.body.checked;
   const dueDate = req.body.dueDate;
@@ -138,4 +138,14 @@ exports.postAddTask = (req, res) => {
     .catch((err) => {
       console.log(err);
     });
+};
+
+module.exports = {
+  getTasks,
+  getTask,
+  deleteTask,
+  getEditTask,
+  postEditTask,
+  getAddTask,
+  postAddTask,
 };
