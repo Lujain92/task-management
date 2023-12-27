@@ -1,5 +1,5 @@
-const { getDb } = require('../../util/database');
-const Task = require('../../models/task');
+import { getDb  } from '../../util/database.js';
+import Task from '../../models/task.js'
 
 jest.mock('../../util/database', () => ({
   getDb: jest.fn(),

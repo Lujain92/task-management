@@ -1,5 +1,5 @@
-const taskControllers = require('../../controllers/task');
-const Task = require('../../models/task');
+import Task from '../../models/task.js'
+import { getTasks, getAddTask, postAddTask, deleteTask, getEditTask, postEditTask, getTask } from '../../controllers/task.js';
 
 jest.mock('../../models/task');
 
@@ -24,7 +24,7 @@ describe('test the tasks routes', () => {
         render: mockRender,
       };
 
-      await taskControllers.getTasks({}, mockRes);
+      await getTasks({}, mockRes);
 
       expect(Task.fetchAll).toHaveBeenCalled();
       expect(mockRender).toHaveBeenCalledWith('tasks-list', {
@@ -34,7 +34,7 @@ describe('test the tasks routes', () => {
 
     it('should catch the error with getTasks', async () => {
       Task.fetchAll.mockRejectedValue(null);
-      await taskControllers.getTasks();
+      await getTasks();
 
       expect(Task.fetchAll).toHaveBeenCalled();
     });
@@ -57,7 +57,7 @@ describe('test the tasks routes', () => {
         params: { taskId: mockTask._id },
       };
 
-      await taskControllers.getTask(mockReq, mockRes);
+      await getTask(mockReq, mockRes);
 
       expect(Task.findById).toHaveBeenCalledWith(mockTask._id);
       expect(mockRender).toHaveBeenCalledWith('task-detail', {
@@ -76,7 +76,7 @@ describe('test the tasks routes', () => {
         params: { taskId: 'not-exist' },
       };
 
-      await taskControllers.getTask(mockReq, mockRes);
+      await getTask(mockReq, mockRes);
 
       expect(mockRes.redirect).toHaveBeenCalledWith('/task');
     });
@@ -88,7 +88,7 @@ describe('test the tasks routes', () => {
         params: { taskId: 'not-exist' },
       };
 
-      await taskControllers.getTask(mockReq);
+      await getTask(mockReq);
 
       expect(Task.findById).toHaveBeenCalled();
     });
@@ -109,7 +109,7 @@ describe('test the tasks routes', () => {
         redirect: jest.fn(),
       };
 
-      await taskControllers.deleteTask(mockReq, mockRes);
+      await deleteTask(mockReq, mockRes);
 
       expect(Task.deleteById).toHaveBeenCalledWith(mockTaskId);
       expect(mockRes.redirect).toHaveBeenCalledWith('/task');
@@ -124,7 +124,7 @@ describe('test the tasks routes', () => {
         body: { taskId: mockTaskId },
       };
 
-      await taskControllers.deleteTask(mockReq);
+      await deleteTask(mockReq);
 
       expect(Task.deleteById).toHaveBeenCalledWith(mockTaskId);
     });
@@ -148,7 +148,7 @@ describe('test the tasks routes', () => {
         query: { edit: 'true' },
       };
 
-      await taskControllers.getEditTask(mockReq, mockRes);
+      await getEditTask(mockReq, mockRes);
 
       expect(Task.findById).toHaveBeenCalledWith(mockTask._id);
       expect(mockRender).toHaveBeenCalledWith('edit-task', {
@@ -170,7 +170,7 @@ describe('test the tasks routes', () => {
         query: { edit: false },
       };
 
-      await taskControllers.getEditTask(mockReq, mockRes);
+      await getEditTask(mockReq, mockRes);
 
       expect(mockRes.redirect).toHaveBeenCalledWith('/task');
     });
@@ -184,7 +184,7 @@ describe('test the tasks routes', () => {
         query: { edit: true },
       };
 
-      await taskControllers.getEditTask(mockReq);
+      await getEditTask(mockReq);
 
       expect(Task.findById).toHaveBeenCalledWith(mockTaskId);
     });
@@ -202,7 +202,7 @@ describe('test the tasks routes', () => {
         query: { edit: 'true' },
       };
 
-      await taskControllers.getEditTask(mockReq, mockRes);
+      await getEditTask(mockReq, mockRes);
 
       expect(Task.findById).toHaveBeenCalledWith('nonExistentId');
       expect(mockRes.redirect).toHaveBeenCalledWith('/task');
@@ -237,7 +237,7 @@ describe('test the tasks routes', () => {
         redirect: jest.fn(),
       };
 
-      await taskControllers.postEditTask(mockReq, mockRes);
+      await postEditTask(mockReq, mockRes);
 
       expect(mockSave).toHaveBeenCalled();
       expect(mockRes.redirect).toHaveBeenCalledWith('/task');
@@ -260,7 +260,7 @@ describe('test the tasks routes', () => {
         body: { taskId: mockTaskId, name: 'Task', dueDate: '2023-12-21' },
       };
 
-      await taskControllers.postEditTask(mockReq);
+      await postEditTask(mockReq);
 
       expect(task.save).toHaveBeenCalled();
     });
@@ -275,7 +275,7 @@ describe('test the tasks routes', () => {
         render: mockRender,
       };
 
-      await taskControllers.getAddTask({}, mockRes);
+      await getAddTask({}, mockRes);
 
       expect(mockRender).toHaveBeenCalledWith('edit-task');
     });
@@ -299,7 +299,7 @@ describe('test the tasks routes', () => {
         redirect: jest.fn(),
       };
 
-      await taskControllers.postAddTask(mockReq, mockRes);
+      await postAddTask(mockReq, mockRes);
 
       expect(task.save).toHaveBeenCalled();
       expect(mockRes.redirect).toHaveBeenCalledWith('/task');
@@ -317,7 +317,7 @@ describe('test the tasks routes', () => {
         body: mockTask,
       };
 
-      await taskControllers.postAddTask(mockReq);
+      await postAddTask(mockReq);
 
       expect(task.save).toHaveBeenCalled();
     });
