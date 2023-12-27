@@ -6,7 +6,7 @@ import Task from '../models/task.js'
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-const getTasks = async (req, res) => {
+const getTasks = async (req, res, next) => {
   try {
     const tasks = await Task.fetchAll();
     console.log(tasks);
@@ -15,6 +15,9 @@ const getTasks = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -23,7 +26,7 @@ const getTasks = async (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-const getTask = async (req, res) => {
+const getTask = async (req, res, next) => {
   try {
     const taskId = req.params.taskId;
     const task = await Task.findById(taskId);
@@ -35,6 +38,9 @@ const getTask = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -44,7 +50,7 @@ const getTask = async (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-const deleteTask = async (req, res) => {
+const deleteTask = async (req, res, next) => {
   try {
     const taskId = req.body.taskId;
     await Task.deleteById(taskId);
@@ -52,6 +58,9 @@ const deleteTask = async (req, res) => {
     res.redirect('/task');
   } catch (err) {
     console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -61,7 +70,7 @@ const deleteTask = async (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-const getEditTask = async (req, res) => {
+const getEditTask = async (req, res, next) => {
   try {
     const editMode = req.query.edit;
     if (!editMode) {
@@ -78,6 +87,9 @@ const getEditTask = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -87,7 +99,7 @@ const getEditTask = async (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-const postEditTask = async (req, res) => {
+const postEditTask = async (req, res, next) => {
   try {
     const taskId = req.body.taskId;
     const name = req.body.name;
@@ -99,6 +111,9 @@ const postEditTask = async (req, res) => {
     res.redirect('/task');
   } catch (err) {
     console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -107,7 +122,7 @@ const postEditTask = async (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-const getAddTask = (req, res) => {
+const getAddTask = (req, res, next) => {
   res.render('edit-task');
 };
 
@@ -117,7 +132,7 @@ const getAddTask = (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-const postAddTask = async (req, res) => {
+const postAddTask = async (req, res, next) => {
   try {
     const name = req.body.name;
     const checked = req.body.checked;
@@ -128,6 +143,9 @@ const postAddTask = async (req, res) => {
     res.redirect('/task');
   } catch (err) {
     console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
