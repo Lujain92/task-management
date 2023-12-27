@@ -1,10 +1,5 @@
-const { mongoConnect, getDb } = require('../util/database');
-const { MongoClient } = require('mongodb');
-const dotenv = require('dotenv');
-
-jest.mock('dotenv', () => ({
-  config: jest.fn(),
-}));
+import { mongoConnect, getDb } from '../util/database.js'
+import { MongoClient } from 'mongodb';
 
 describe('MongoDB Connection', () => {
 
@@ -20,24 +15,19 @@ describe('MongoDB Connection', () => {
 
   describe('mongoConnect function', () => {
     
-    it('should establish a MongoDB connection and call the callback', async () => {
-      const callback = jest.fn();
-      dotenv.config.mockReturnValueOnce();
+    it('should establish a MongoDB connection', async () => {
 
-      await mongoConnect(callback);
+      await mongoConnect();
 
-      expect(MongoClient.connect).toHaveBeenCalledWith(process.env.MONGO_URL);
+      expect(MongoClient.connect).toHaveBeenCalled();
       expect(mockClient.db).toHaveBeenCalled();
-      expect(callback).toHaveBeenCalled();
     });
 
     it('should throw an error if the MongoDB connection fails', async () => {
 
-      const callback = jest.fn();
       const errorMessage = 'Connection failed';
       MongoClient.connect.mockRejectedValueOnce(new Error(errorMessage));
 
-      expect(callback).not.toHaveBeenCalled();
     });
 
   });
@@ -45,8 +35,7 @@ describe('MongoDB Connection', () => {
   describe('getDb function', () => {
 
     it('should throw an error if no database instance is found', () => {
-      _db = null;
-
+      
       expect(getDb).toThrow('No database found!');
     });
   });

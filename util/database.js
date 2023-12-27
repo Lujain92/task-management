@@ -1,26 +1,23 @@
-require('dotenv').config();
+import dotenv from 'dotenv'
+dotenv.config()
 
-const mongodb = require('mongodb');
-const MongoClient = mongodb.MongoClient;
+import { MongoClient } from 'mongodb';
 
 let _db;
 
 /**
  * Establishes a connection to a MongoDB database using the provided MONGO_URL.
- * @param {Function} callback - A callback function to be executed upon successful connection.
  * @throws {Error} Throws an error if the connection to the database fails.
  */
-const mongoConnect = (callback) => {
-  MongoClient.connect(process.env.MONGO_URL)
-    .then((client) => {
-      console.log('Connected!');
-      _db = client.db();
-      callback();
-    })
-    .catch((err) => {
-      console.log(err);
-      throw err;
-    });
+const mongoConnect = async () => {
+  try {
+    const client = await MongoClient.connect('mongodb+srv://user:0000@cluster0.4qaxvnn.mongodb.net/list?retryWrites=true&w=majority');
+    console.log('Connected to MongoDB!');
+    _db = client.db();
+  } catch (err) {
+    console.error('Error connecting to MongoDB:', err);
+    throw err;
+  }
 };
 
 /**
@@ -35,5 +32,5 @@ const getDb = () => {
   throw 'No database found!';
 };
 
-module.exports = { mongoConnect, getDb };
+export  { mongoConnect, getDb };
 

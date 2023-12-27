@@ -1,4 +1,4 @@
-const Task = require('../models/task');
+import Task from '../models/task.js'
 
 /**
  * Renders the tasks list view.
@@ -6,17 +6,16 @@ const Task = require('../models/task');
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-getTasks = (req, res) => {
-  Task.fetchAll()
-    .then((tasks) => {
-      console.log(tasks);
-      res.render('tasks-list', {
-        tasks: tasks,
-      });
-    })
-    .catch((err) => {
-      console.log(err);
+const getTasks = async (req, res) => {
+  try {
+    const tasks = await Task.fetchAll();
+    console.log(tasks);
+    res.render('tasks-list', {
+      tasks: tasks,
     });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 /**
@@ -24,20 +23,19 @@ getTasks = (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-getTask = (req, res) => {
-  const taskId = req.params.taskId;
-  Task.findById(taskId)
-    .then((task) => {
-      if (!task) {
-        return res.redirect('/task');
-      }
-      res.render('task-detail', {
-        task: task,
-      });
-    })
-    .catch((err) => {
-      console.log(err);
+const getTask = async (req, res) => {
+  try {
+    const taskId = req.params.taskId;
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.redirect('/task');
+    }
+    res.render('task-detail', {
+      task: task,
     });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 /**
@@ -46,16 +44,15 @@ getTask = (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-deleteTask = (req, res) => {
-  const taskId = req.body.taskId;
-  Task.deleteById(taskId)
-    .then(() => {
-      console.log('DESTROYED Task');
-      res.redirect('/task');
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+const deleteTask = async (req, res) => {
+  try {
+    const taskId = req.body.taskId;
+    await Task.deleteById(taskId);
+    console.log('DESTROYED Task');
+    res.redirect('/task');
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 /**
@@ -64,25 +61,24 @@ deleteTask = (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-getEditTask = (req, res) => {
-  const editMode = req.query.edit;
-  if (!editMode) {
-    return res.redirect('/task');
-  }
-  const taskId = req.params.taskId;
-  Task.findById(taskId)
-    .then((task) => {
-      if (!task) {
-        return res.redirect('/task');
-      }
-      res.render('edit-task', {
-        editing: editMode,
-        task: task,
-      });
-    })
-    .catch((err) => {
-      console.log(err);
+const getEditTask = async (req, res) => {
+  try {
+    const editMode = req.query.edit;
+    if (!editMode) {
+      return res.redirect('/task');
+    }
+    const taskId = req.params.taskId;
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.redirect('/task');
+    }
+    res.render('edit-task', {
+      editing: editMode,
+      task: task,
     });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 /**
@@ -91,22 +87,19 @@ getEditTask = (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-postEditTask = (req, res) => {
-  const taskId = req.body.taskId;
-  const name = req.body.name;
-  const checked = req.body.checked;
-  const dueDate = req.body.dueDate;
-  const task = new Task(name, checked, dueDate, taskId);
-
-  task
-    .save()
-    .then(() => {
-      console.log('UPDATED Task!');
-      res.redirect('/task');
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+const postEditTask = async (req, res) => {
+  try {
+    const taskId = req.body.taskId;
+    const name = req.body.name;
+    const checked = req.body.checked;
+    const dueDate = req.body.dueDate;
+    const task = new Task(name, checked, dueDate, taskId);
+    await task.save();
+    console.log('UPDATED Task!');
+    res.redirect('/task');
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 /**
@@ -114,7 +107,7 @@ postEditTask = (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-getAddTask = (req, res) => {
+const getAddTask = (req, res) => {
   res.render('edit-task');
 };
 
@@ -124,23 +117,21 @@ getAddTask = (req, res) => {
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
  */
-postAddTask = (req, res) => {
-  const name = req.body.name;
-  const checked = req.body.checked;
-  const dueDate = req.body.dueDate;
-  const task = new Task(name, checked, dueDate, null);
-  task
-    .save()
-    .then(() => {
-      console.log('Created Task');
-      res.redirect('/task');
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+const postAddTask = async (req, res) => {
+  try {
+    const name = req.body.name;
+    const checked = req.body.checked;
+    const dueDate = req.body.dueDate;
+    const task = new Task(name, checked, dueDate, null);
+    await task.save();
+    console.log('Created Task');
+    res.redirect('/task');
+  } catch (err) {
+    console.log(err);
+  }
 };
 
-module.exports = {
+export {
   getTasks,
   getTask,
   deleteTask,
