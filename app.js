@@ -28,6 +28,6 @@ app.use((error, req, res, next) => {
 app.use(get404);
 
 
-mongoConnect();
+await mongoConnect();
 
 app.listen(3000);

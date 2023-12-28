@@ -1,6 +1,10 @@
-import mongodb from 'mongodb'
+import { ObjectId } from 'mongodb'
 import { getDb  } from '../util/database.js';
+
 class Task {
+  // static db = getDb;
+
+  
   /**
    * Represents a task object.
    * @param {string} name - Name of the task.
@@ -12,7 +16,7 @@ class Task {
     this.name = name;
     this.checked = checked;
     this.dueDate = dueDate;
-    this._id = taskId ? new mongodb.ObjectId(taskId) : null;
+    this._id = taskId ? new ObjectId(taskId) : null;
   }
 
   /**
@@ -21,14 +25,13 @@ class Task {
    */
   async save() {
     try {
-      const db = getDb();
+      // const db = getDb();
       let dbOp;
       if (this._id) {
         dbOp = await db.collection('task').updateOne({ _id: this._id }, { $set: this });
       } else {
         dbOp = await db.collection('task').insertOne(this);
       }
-      console.log(dbOp);
     } catch (err) {
       console.log(err);
     }
@@ -56,8 +59,7 @@ class Task {
   static async findById(taskId) {
     try {
       const db = getDb();
-      const task = await db.collection('task').find({ _id: new mongodb.ObjectId(taskId) }).next();
-      console.log(task);
+      const task = await db.collection('task').find({ _id: new ObjectId(taskId) }).next();
       return task;
     } catch (err) {
       console.log(err);
@@ -71,9 +73,8 @@ class Task {
    */
   static async deleteById(taskId) {
     try {
-      const db = getDb();
-      await db.collection('task').deleteOne({ _id: new mongodb.ObjectId(taskId) });
-      console.log('Deleted');
+      // const db = getDb();
+      await db.collection('task').deleteOne({ _id: new ObjectId(taskId) });
     } catch (err) {
       console.log(err);
     }
