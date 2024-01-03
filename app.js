@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import express from 'express';
 import taskRoutes from './routes/task.js'
 import get404 from './controllers/error.js';
-import {mongoConnect} from './util/database.js'
+import {mongoConnect,getDb} from './util/database.js'
 
 const app = express();
 
@@ -24,7 +24,7 @@ app.use('/task',taskRoutes);
 app.use((error, req, res, next) => {
     res.status(500).render('500');
   });
-  
+
 app.use(get404);
 
 

@@ -29,5 +29,9 @@ const getDb = () => {
   throw 'No database found!';
 };
 
-export  { mongoConnect, getDb };
+const test = async (updatedTask) => {
+  return await _db.collection('task').updateOne({ _id: updatedTask._id }, { $set: updatedTask });
+}
+
+export  { mongoConnect, getDb , test};
 
