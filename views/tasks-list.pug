@@ -8,7 +8,8 @@ block content
   if tasks.length > 0
     div
       each task in tasks
-        section(class=(task.checked ===  null && new Date(task.dueDate) < new Date() ? 'overdue' : ''))
+
+        section(class=(task.overDue ===  true ? 'overdue' : ''))
           header
             h1= task.name
           div

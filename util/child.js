@@ -1,47 +1,37 @@
 
-import Task from '../models/task.js'
+import Task from '../models/task.js';
 import * as dotenv from 'dotenv';
-import * as dbb from '../util/database.js'
+import  { mongoConnect } from '../util/database.js';
 
 dotenv.config();
+await mongoConnect();
 
-console.log('child created', process.pid)
-process.on('message', (message) => {
-    console.log('message', message);
-    updateOverdueTasksQ(message)
-//    console.log('update', updateOverdueTasksQ(message))
+process.on('message', async (message) => {
+    const status = checkStatus().checkStatus;
+    status && await updateOverdueTasks(message);
     process.exit(1);
-})
+});
 
+/**
+ * Retrieves the status from environment variables.
+ * @returns {{checkStatus: string}} The status object containing the checkStatus value.
+ */
 const checkStatus = () => {
-    return { checkStatus: process.env.checkStatus }
-}
+    return { checkStatus: process.env.checkStatus };
+};
 
-console.log(checkStatus())
 
-const updateOverdueTasks = (message) => {
-    let updatedTasks = message.tasks.map( task => {
-        if (task.checked ===  null && new Date(task.dueDate) < new Date()){
-            return {
-                ...task,
-                overDue: true
-            }
-        }
-        return task
-    })
-    return updatedTasks
-}
-
-const updateOverdueTasksQ = (message) => {
-     message.tasks.forEach( async task => {
-         if (task.checked ===  null && new Date(task.dueDate) < new Date()){
-            console.log('ener')
+/**
+ * Updates overdue tasks based on the received message.
+ * @param {{tasks: Array}} message The message containing tasks array.
+ * @returns {Promise<string>} A Promise that resolves to 'done' after tasks update.
+ */
+const updateOverdueTasks = async (message) => {
+    for (const task of message.tasks) {
+        if (task.checked === null && new Date(task.dueDate) < new Date()) {
             const updatedTask = new Task(task.name, task.checked, task.dueDate, task._id, true);
-                const dbOp = await dbb.test(task);
-                console.log('aaaa',dbOp);
-            //   await updatedTask.save();
-
+            await updatedTask.save();
         }
-    })
-    return 'done'
-}
+    }
+    return 'done';
+};

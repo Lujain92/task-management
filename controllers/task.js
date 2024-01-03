@@ -10,15 +10,19 @@ import Task from '../models/task.js';
 const getTasks = async (req, res, next) => {
   try {
     const tasks = await Task.fetchAll();
-    const child = fork('util/child.js')
-    child.send({tasks})
+
+
+    const child = fork('util/child.js');
+
+    child.send({ tasks });
+
     process.on('exit', (code) => {
-      console.log('code',code)
+      console.log('code', code)
     })
-    console.log('tasks', tasks);
     res.render('tasks-list', {
       tasks: tasks,
     });
+
   } catch (err) {
     console.log(err);
     const error = new Error(err);

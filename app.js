@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import express from 'express';
 import taskRoutes from './routes/task.js'
 import get404 from './controllers/error.js';
-import {mongoConnect,getDb} from './util/database.js'
+import {mongoConnect} from './util/database.js'
 
 const app = express();
 
@@ -30,4 +30,11 @@ app.use(get404);
 
 await mongoConnect();
 
-app.listen(3000);
+
+app.listen(3000,(err) => {
+  if (err) {
+    console.error('Error starting server:', err);
+    return;
+  }
+  console.log('Server is running on port 3000');
+});
