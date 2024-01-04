@@ -27,13 +27,10 @@ class Task {
       const db = getDb();
       let dbOp;
       if (this._id) {
-        console.log('id',this);
         dbOp = await db.collection('task').updateOne({ _id: this._id }, { $set: this });
-        console.log('aaaa',dbOp);
       } else {
         dbOp = await db.collection('task').insertOne(this);
       }
-      console.log('dpOp',dbOp)
     } catch (err) {
       console.log(err);
     }

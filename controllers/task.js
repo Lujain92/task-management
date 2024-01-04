@@ -1,6 +1,6 @@
 import { fork } from 'child_process';
 import Task from '../models/task.js';
-
+import { overDueTask } from '../util/helper.js'
 /**
  * Renders the tasks list view.
  * Fetches all tasks from the database and renders the tasks-list view with the fetched tasks.
@@ -115,7 +115,9 @@ const postEditTask = async (req, res, next) => {
     const name = req.body.name;
     const checked = req.body.checked;
     const dueDate = req.body.dueDate;
-    const task = new Task(name, checked, dueDate, taskId);
+    const overDue = overDueTask(checked, dueDate)
+    console.log(overDue,'over',checked, dueDate)
+    const task = new Task(name, checked, dueDate, taskId, overDue);
     await task.save();
     console.log('UPDATED Task!');
     res.redirect('/task');
