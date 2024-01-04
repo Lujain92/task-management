@@ -10,11 +10,58 @@ jest.mock('mongodb', () => ({
 }));
 
 describe('Task', () => {
+
   describe('save()', () => {
+    let mockCollection;
+    let mockDb;
+
+    beforeAll(() => {
+
+      mockCollection = {
+        createIndex: jest.fn(),
+        updateOne: jest.fn(),
+        insertOne: jest.fn(),
+      };
+
+      mockDb = {
+        collection: jest.fn(() => mockCollection),
+      };
+
+      getDb.mockReturnValue(mockDb);
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should insert a new task when _id is not present', async () => {
+      const task = new Task({ name: 'Sample Task' });
+
+      mockCollection.insertOne.mockResolvedValueOnce({});
+
+      await task.save();
+
+      expect(mockCollection.createIndex).toHaveBeenCalledWith({ name: 1 }, { unique: true });
+      expect(mockCollection.insertOne).toHaveBeenCalledWith(task);
+      expect(mockCollection.updateOne).not.toHaveBeenCalled();
+    });
+
+    it('should throw an error when there is an issue with saving', async () => {
+      const task = new Task({ name: 'Sample Task' });
+      const errorMessage = 'Database error';
+
+      mockCollection.insertOne.mockRejectedValueOnce(new Error(errorMessage));
+
+      await expect(task.save()).rejects.toThrow(errorMessage);
+    });
+  });
+
+  describe('save() in another way', () => {
 
     it('should insert a new task', async () => {
+      const createIndexMock = jest.fn().mockResolvedValue();
       const insertOneMock = jest.fn().mockResolvedValue({ insertedCount: 1 });
-      const collectionMock = jest.fn().mockReturnValue({ insertOne: insertOneMock });
+      const collectionMock = jest.fn().mockReturnValue({ insertOne: insertOneMock, createIndex: createIndexMock });
       getDb.mockReturnValue({ collection: collectionMock });
 
       const newTask = new Task({
@@ -23,6 +70,7 @@ describe('Task', () => {
       });
 
       await newTask.save();
+      expect(createIndexMock).toHaveBeenCalledWith({ name: 1 }, { unique: true });
 
       expect(getDb).toHaveBeenCalled();
       expect(collectionMock).toHaveBeenCalledWith('task');

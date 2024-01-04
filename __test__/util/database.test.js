@@ -1,4 +1,4 @@
-import { mongoConnect, getDb } from '../util/database.js'
+import { mongoConnect, getDb } from '../../util/database.js'
 import { MongoClient } from 'mongodb';
 import * as dotenv from 'dotenv';
 

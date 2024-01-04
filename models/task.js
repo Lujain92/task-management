@@ -26,6 +26,9 @@ class Task {
     try {
       const db = getDb();
       let dbOp;
+
+      await db.collection('task').createIndex({ name: 1 }, { unique: true });
+
       if (this._id) {
         dbOp = await db.collection('task').updateOne({ _id: this._id }, { $set: this });
       } else {
@@ -33,6 +36,7 @@ class Task {
       }
     } catch (err) {
       console.log(err);
+      throw err;
     }
   }
 
