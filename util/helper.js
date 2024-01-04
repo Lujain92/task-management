@@ -6,7 +6,7 @@
  * @returns {boolean} Returns true if the task is overdue, otherwise false.
  */
 const overDueTask = (checked, dueDate) => {
-    if ((checked ===  undefined || null ) && new Date(dueDate) < new Date()) {
+    if ((checked ===  undefined || checked === null ) && new Date(dueDate) < new Date()) {
         return true;
      }
     return false

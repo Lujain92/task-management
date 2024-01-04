@@ -20,7 +20,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/task',taskRoutes);
 
 app.use((error, req, res, next) => {
-    res.status(500).render('500');
+
+  const errorMessage = error.message.replace(/\n/g, '<br>');
+  res.status(error.httpStatusCode).render('error', {message : errorMessage});
   });
 
 app.use(get404);

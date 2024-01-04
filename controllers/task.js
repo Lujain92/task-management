@@ -27,6 +27,7 @@ const getTasks = async (req, res, next) => {
     console.log(err);
     const error = new Error(err);
     error.httpStatusCode = 500;
+    error.message = 'Some error occurred! We are working on fixing this,\nsorry for the inconvenience!';
     return next(error);
   }
 };
@@ -50,6 +51,7 @@ const getTask = async (req, res, next) => {
     console.log(err);
     const error = new Error(err);
     error.httpStatusCode = 500;
+    error.message = 'Some error occurred! We are working on fixing this,\nsorry for the inconvenience!';
     return next(error);
   }
 };
@@ -70,6 +72,7 @@ const deleteTask = async (req, res, next) => {
     console.log(err);
     const error = new Error(err);
     error.httpStatusCode = 500;
+    error.message = 'Some error occurred! We are working on fixing this,\nsorry for the inconvenience!';
     return next(error);
   }
 };
@@ -99,6 +102,7 @@ const getEditTask = async (req, res, next) => {
     console.log(err);
     const error = new Error(err);
     error.httpStatusCode = 500;
+    error.message = 'Some error occurred! We are working on fixing this,\nsorry for the inconvenience!';
     return next(error);
   }
 };
@@ -125,6 +129,7 @@ const postEditTask = async (req, res, next) => {
     console.log(err);
     const error = new Error(err);
     error.httpStatusCode = 500;
+    error.message = 'Some error occurred! We are working on fixing this,\nsorry for the inconvenience!';
     return next(error);
   }
 };
@@ -154,10 +159,18 @@ const postAddTask = async (req, res, next) => {
     console.log('Created Task');
     res.redirect('/task');
   } catch (err) {
-    console.log(err);
-    const error = new Error(err);
-    error.httpStatusCode = 500;
-    return next(error);
+    if (err && err.code === 11000) {
+      const error = new Error(err);
+      error.httpStatusCode = 409;
+      error.message = `Task name must be unique.\n${req.body.name} is already in use`;
+      return next(error)
+    } else {
+      console.log(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      error.message = 'Some error occurred! We are working on fixing this,\nsorry for the inconvenience!';
+      return next(error);
+    }
   }
 };
 
