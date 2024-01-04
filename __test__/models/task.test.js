@@ -46,6 +46,17 @@ describe('Task', () => {
       expect(mockCollection.updateOne).not.toHaveBeenCalled();
     });
 
+    // it('should update an existing task when _id is present', async () => {
+    //   const task = new Task({ _id: 'someId', name: 'Updated Task' });
+
+    //   mockCollection.updateOne.mockResolvedValueOnce({});
+    //   await task.save();
+
+    //   expect(mockCollection.createIndex).toHaveBeenCalledWith({ name: 1 }, { unique: true });
+    //   expect(mockCollection.updateOne).toHaveBeenCalledWith({ _id: task._id }, { $set: task });
+    //   expect(mockCollection.insertOne).not.toHaveBeenCalled();
+    // });
+
     it('should throw an error when there is an issue with saving', async () => {
       const task = new Task({ name: 'Sample Task' });
       const errorMessage = 'Database error';
@@ -54,6 +65,7 @@ describe('Task', () => {
 
       await expect(task.save()).rejects.toThrow(errorMessage);
     });
+
   });
 
   describe('save() in another way', () => {
