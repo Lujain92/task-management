@@ -1,8 +1,7 @@
-import dotenv from 'dotenv'
-dotenv.config()
-
 import { MongoClient } from 'mongodb';
+import * as dotenv from 'dotenv';
 
+dotenv.config();
 let _db;
 
 /**
@@ -11,7 +10,7 @@ let _db;
  */
 const mongoConnect = async () => {
   try {
-    const client = await MongoClient.connect('mongodb+srv://user:0000@cluster0.4qaxvnn.mongodb.net/list?retryWrites=true&w=majority');
+    const client = await MongoClient.connect(process.env.MONGODB_URL);
     console.log('Connected to MongoDB!');
     _db = client.db();
   } catch (err) {

@@ -34,7 +34,11 @@ describe('test the tasks routes', () => {
 
     it('should catch the error with getTasks', async () => {
       Task.fetchAll.mockRejectedValue(null);
-      await getTasks();
+      const  mockNext = jest.fn();
+
+      await getTasks({} , {}, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
 
       expect(Task.fetchAll).toHaveBeenCalled();
     });
@@ -87,9 +91,10 @@ describe('test the tasks routes', () => {
       const mockReq = {
         params: { taskId: 'not-exist' },
       };
+      const  mockNext = jest.fn();
 
-      await getTask(mockReq);
-
+      await getTask(mockReq, {}, mockNext);
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       expect(Task.findById).toHaveBeenCalled();
     });
 
@@ -124,8 +129,11 @@ describe('test the tasks routes', () => {
         body: { taskId: mockTaskId },
       };
 
-      await deleteTask(mockReq);
+      const  mockNext = jest.fn();
 
+      await deleteTask(mockReq, {}, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       expect(Task.deleteById).toHaveBeenCalledWith(mockTaskId);
     });
 
@@ -183,8 +191,10 @@ describe('test the tasks routes', () => {
         params: { taskId: mockTaskId },
         query: { edit: true },
       };
+      const  mockNext = jest.fn();
 
-      await getEditTask(mockReq);
+      await getEditTask(mockReq, {}, mockNext);
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
 
       expect(Task.findById).toHaveBeenCalledWith(mockTaskId);
     });
@@ -260,8 +270,11 @@ describe('test the tasks routes', () => {
         body: { taskId: mockTaskId, name: 'Task', dueDate: '2023-12-21' },
       };
 
-      await postEditTask(mockReq);
+      const  mockNext = jest.fn();
 
+      await postEditTask(mockReq, {}, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       expect(task.save).toHaveBeenCalled();
     });
 
@@ -283,7 +296,7 @@ describe('test the tasks routes', () => {
   });
 
   describe('test postAddTask function', () => {
-    
+
     it('should create a new task and redirect', async () => {
       const mockTask = { name: 'new Task', dueDate: '2023-12-21' };
       const task = new Task(mockTask);
@@ -317,7 +330,10 @@ describe('test the tasks routes', () => {
         body: mockTask,
       };
 
-      await postAddTask(mockReq);
+      const  mockNext = jest.fn();
+
+      await postAddTask(mockReq, {}, mockNext);
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
 
       expect(task.save).toHaveBeenCalled();
     });

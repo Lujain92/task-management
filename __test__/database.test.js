@@ -1,5 +1,11 @@
 import { mongoConnect, getDb } from '../util/database.js'
 import { MongoClient } from 'mongodb';
+import * as dotenv from 'dotenv';
+
+
+jest.mock('dotenv', () => ({
+  config: jest.fn(),
+}));
 
 describe('MongoDB Connection', () => {
 
@@ -14,12 +20,13 @@ describe('MongoDB Connection', () => {
   });
 
   describe('mongoConnect function', () => {
-    
+
     it('should establish a MongoDB connection', async () => {
+      dotenv.config.mockReturnValueOnce();
 
       await mongoConnect();
 
-      expect(MongoClient.connect).toHaveBeenCalled();
+      expect(MongoClient.connect).toHaveBeenCalledWith(process.env.MONGO_URL);
       expect(mockClient.db).toHaveBeenCalled();
     });
 
@@ -35,7 +42,7 @@ describe('MongoDB Connection', () => {
   describe('getDb function', () => {
 
     it('should throw an error if no database instance is found', () => {
-      
+
       expect(getDb).toThrow('No database found!');
     });
   });
