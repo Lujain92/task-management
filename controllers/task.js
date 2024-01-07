@@ -1,59 +1,63 @@
 import { fork } from 'child_process';
+import errorMessages from '../util/errors-messages.js';
 import Task from '../models/task.js';
-import { overDueTask } from '../util/helper.js'
+import { errorHandler, overDueTask } from '../util/helper.js';
+
 /**
  * Renders the tasks list view.
  * Fetches all tasks from the database and renders the tasks-list view with the fetched tasks.
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
  */
 const getTasks = async (req, res, next) => {
-  try {
-    const tasks = await Task.fetchAll();
+    try {
+        const tasks = await Task.fetchAll();
 
+        const child = fork('util/child.js');
+        child.send({ tasks });
+        process.on('exit', (code) => {
+            console.log('code', code);
+        });
 
-    const child = fork('util/child.js');
-
-    child.send({ tasks });
-
-    process.on('exit', (code) => {
-      console.log('code', code)
-    })
-    res.render('tasks-list', {
-      tasks: tasks,
-    });
-
-  } catch (err) {
-    console.log(err);
-    const error = new Error(err);
-    error.httpStatusCode = 500;
-    error.message = 'Some error occurred! We are working on fixing this,\nsorry for the inconvenience!';
-    return next(error);
-  }
+        res.render('tasks-list', {
+            tasks: tasks,
+        });
+    } catch (err) {
+        return errorHandler(
+            err,
+            next,
+            errorMessages.serverError.message,
+            errorMessages.serverError.status,
+        );
+    }
 };
 
 /**
  * Renders the tasks list view.
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
  */
 const getTask = async (req, res, next) => {
-  try {
-    const taskId = req.params.taskId;
-    const task = await Task.findById(taskId);
-    if (!task) {
-      return res.redirect('/task');
+    try {
+        const taskId = req.params.taskId;
+        const task = await Task.findById(taskId);
+        if (!task) {
+            return res.redirect('/task');
+        }
+
+        res.render('task-detail', {
+            task: task,
+        });
+    } catch (err) {
+        return errorHandler(
+            err,
+            next,
+            errorMessages.serverError.message,
+            errorMessages.serverError.status,
+        );
     }
-    res.render('task-detail', {
-      task: task,
-    });
-  } catch (err) {
-    console.log(err);
-    const error = new Error(err);
-    error.httpStatusCode = 500;
-    error.message = 'Some error occurred! We are working on fixing this,\nsorry for the inconvenience!';
-    return next(error);
-  }
 };
 
 /**
@@ -61,20 +65,23 @@ const getTask = async (req, res, next) => {
  * Redirects to the '/task' route after deletion.
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
  */
 const deleteTask = async (req, res, next) => {
-  try {
-    const taskId = req.body.taskId;
-    await Task.deleteById(taskId);
-    console.log('DESTROYED Task');
-    res.redirect('/task');
-  } catch (err) {
-    console.log(err);
-    const error = new Error(err);
-    error.httpStatusCode = 500;
-    error.message = 'Some error occurred! We are working on fixing this,\nsorry for the inconvenience!';
-    return next(error);
-  }
+    try {
+        const taskId = req.body.taskId;
+        await Task.deleteById(taskId);
+        console.log('DESTROYED Task');
+
+        res.redirect('/task');
+    } catch (err) {
+        return errorHandler(
+            err,
+            next,
+            errorMessages.serverError.message,
+            errorMessages.serverError.status,
+        );
+    }
 };
 
 /**
@@ -82,29 +89,30 @@ const deleteTask = async (req, res, next) => {
  * Fetches a task by ID and renders the edit-task view for editing.
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
  */
 const getEditTask = async (req, res, next) => {
-  try {
-    const editMode = req.query.edit;
-    if (!editMode) {
-      return res.redirect('/task');
+    try {
+        const editMode = req.query.edit;
+        if (!editMode) {
+            return res.redirect('/task');
+        }
+
+        const taskId = req.params.taskId;
+        const task = await Task.findById(taskId);
+        if (!task) {
+            return res.redirect('/task');
+        }
+
+        res.render('edit-task', { editing: editMode, task });
+    } catch (err) {
+        return errorHandler(
+            err,
+            next,
+            errorMessages.serverError.message,
+            errorMessages.serverError.status,
+        );
     }
-    const taskId = req.params.taskId;
-    const task = await Task.findById(taskId);
-    if (!task) {
-      return res.redirect('/task');
-    }
-    res.render('edit-task', {
-      editing: editMode,
-      task: task,
-    });
-  } catch (err) {
-    console.log(err);
-    const error = new Error(err);
-    error.httpStatusCode = 500;
-    error.message = 'Some error occurred! We are working on fixing this,\nsorry for the inconvenience!';
-    return next(error);
-  }
 };
 
 /**
@@ -112,35 +120,35 @@ const getEditTask = async (req, res, next) => {
  * Redirects to the '/task' route after updating the task.
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
  */
 const postEditTask = async (req, res, next) => {
-  try {
-    const taskId = req.body.taskId;
-    const name = req.body.name;
-    const checked = req.body.checked;
-    const dueDate = req.body.dueDate;
-    const overDue = overDueTask(checked, dueDate)
-    console.log(overDue,'over',checked, dueDate)
-    const task = new Task(name, checked, dueDate, taskId, overDue);
-    await task.save();
-    console.log('UPDATED Task!');
-    res.redirect('/task');
-  } catch (err) {
-    console.log(err);
-    const error = new Error(err);
-    error.httpStatusCode = 500;
-    error.message = 'Some error occurred! We are working on fixing this,\nsorry for the inconvenience!';
-    return next(error);
-  }
+    try {
+        const { taskId, name, checked, dueDate } = req.body;
+        const overDue = overDueTask(checked, dueDate);
+        const task = new Task(name, checked, dueDate, taskId, overDue);
+        await task.save();
+        console.log('UPDATED Task!');
+
+        res.redirect('/task');
+    } catch (err) {
+        return errorHandler(
+            err,
+            next,
+            errorMessages.serverError.message,
+            errorMessages.serverError.status,
+        );
+    }
 };
 
 /**
  * Renders the add task view.
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
  */
 const getAddTask = (req, res, next) => {
-  res.render('edit-task');
+    res.render('edit-task');
 };
 
 /**
@@ -148,38 +156,39 @@ const getAddTask = (req, res, next) => {
  * Redirects to the '/task' route after creating the task.
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
  */
 const postAddTask = async (req, res, next) => {
-  try {
-    const name = req.body.name;
-    const checked = req.body.checked;
-    const dueDate = req.body.dueDate;
-    const task = new Task(name, checked, dueDate, null);
-    await task.save();
-    console.log('Created Task');
-    res.redirect('/task');
-  } catch (err) {
-    if (err && err.code === 11000) {
-      const error = new Error(err);
-      error.httpStatusCode = 409;
-      error.message = `Task name must be unique.\n${req.body.name} is already in use`;
-      return next(error)
-    } else {
-      console.log(err);
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      error.message = 'Some error occurred! We are working on fixing this,\nsorry for the inconvenience!';
-      return next(error);
+    try {
+        const { name, checked, dueDate } = req.body;
+        const task = new Task(name, checked, dueDate, null);
+        await task.save();
+        console.log('Created Task');
+
+        res.redirect('/task');
+    } catch (err) {
+        return err.code ===11000
+            ? errorHandler(
+                  err,
+                  next,
+                  errorMessages.duplicateKey.message,
+                  errorMessages.duplicateKey.status,
+              )
+            : errorHandler(
+                  err,
+                  next,
+                  errorMessages.serverError.message,
+                  errorMessages.serverError.status,
+              );
     }
-  }
 };
 
 export {
-  getTasks,
-  getTask,
-  deleteTask,
-  getEditTask,
-  postEditTask,
-  getAddTask,
-  postAddTask,
+    deleteTask,
+    getAddTask,
+    getEditTask,
+    getTask,
+    getTasks,
+    postAddTask,
+    postEditTask,
 };

@@ -3,5 +3,5 @@ module.exports = {
     arrowParens: 'always',
     singleQuote: true,
     jsxSingleQuote: false,
-    tabWidth: 2,
-  };
+    tabWidth: 4,
+};

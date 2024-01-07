@@ -1,7 +1,6 @@
 import { MongoClient } from 'mongodb';
-import * as dotenv from 'dotenv';
+import configurationService from './ configuration-service.js';
 
-dotenv.config();
 let _db;
 
 /**
@@ -9,14 +8,16 @@ let _db;
  * @throws {Error} Throws an error if the connection to the database fails.
  */
 const mongoConnect = async () => {
-  try {
-    const client = await MongoClient.connect(process.env.MONGODB_URL);
-    console.log('Connected to MongoDB!');
-    _db = client.db();
-  } catch (err) {
-    console.error('Error connecting to MongoDB:', err);
-    throw err;
-  }
+    try {
+        const client = await MongoClient.connect(
+            configurationService.MONGODB_URL,
+        );
+        console.log('Connected to MongoDB!');
+        _db = client.db();
+    } catch (err) {
+        console.error('Error connecting to MongoDB:', err);
+        throw err;
+    }
 };
 
 /**
@@ -25,11 +26,10 @@ const mongoConnect = async () => {
  * @throws {String} Throws an error if no database instance is found.
  */
 const getDb = () => {
-  if (_db) {
-    return _db;
-  }
-  throw 'No database found!';
+    if (_db) {
+        return _db;
+    }
+    throw 'No database found!';
 };
 
-export  { mongoConnect, getDb };
-
+export { getDb, mongoConnect };

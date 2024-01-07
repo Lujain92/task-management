@@ -1,342 +1,351 @@
-import Task from '../../models/task.js'
-import { getTasks, getAddTask, postAddTask, deleteTask, getEditTask, postEditTask, getTask } from '../../controllers/task.js';
+import Task from '../../models/task.js';
+import {
+    getTasks,
+    getAddTask,
+    postAddTask,
+    deleteTask,
+    getEditTask,
+    postEditTask,
+    getTask,
+} from '../../controllers/task.js';
 
 jest.mock('../../models/task');
 
 describe('test the tasks routes', () => {
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  describe('test getTasks function', () => {
-
-    it('should render tasks-list view with tasks', async () => {
-      const mockTasks = [
-        { _id: '12', name: 'Task 1', dueDate: '2023-12-20' },
-        { _id: '23', name: 'Task 2', dueDate: '2023-12-21' },
-      ];
-
-      Task.fetchAll.mockResolvedValue(mockTasks);
-
-      const mockRender = jest.fn();
-      const mockRes = {
-        render: mockRender,
-      };
-
-      await getTasks({}, mockRes);
-
-      expect(Task.fetchAll).toHaveBeenCalled();
-      expect(mockRender).toHaveBeenCalledWith('tasks-list', {
-        tasks: mockTasks,
-      });
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
-    it('should catch the error with getTasks', async () => {
-      Task.fetchAll.mockRejectedValue(null);
-      const  mockNext = jest.fn();
+    describe('test getTasks function', () => {
+        it('should render tasks-list view with tasks', async () => {
+            const mockTasks = [
+                { _id: '12', name: 'Task 1', dueDate: '2023-12-20' },
+                { _id: '23', name: 'Task 2', dueDate: '2023-12-21' },
+            ];
 
-      await getTasks({} , {}, mockNext);
+            Task.fetchAll.mockResolvedValue(mockTasks);
 
-      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+            const mockRender = jest.fn();
+            const mockRes = {
+                render: mockRender,
+            };
 
-      expect(Task.fetchAll).toHaveBeenCalled();
+            await getTasks({}, mockRes);
+
+            expect(Task.fetchAll).toHaveBeenCalled();
+            expect(mockRender).toHaveBeenCalledWith('tasks-list', {
+                tasks: mockTasks,
+            });
+        });
+
+        it('should catch the error with getTasks', async () => {
+            Task.fetchAll.mockRejectedValue(null);
+            const mockNext = jest.fn();
+
+            await getTasks({}, {}, mockNext);
+
+            expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+
+            expect(Task.fetchAll).toHaveBeenCalled();
+        });
     });
 
-  });
+    describe('test getTask function', () => {
+        it('should render task-detail view with task', async () => {
+            const mockTask = {
+                _id: '12',
+                name: 'Task 1',
+                dueDate: '2023-12-20',
+            };
 
-  describe('test getTask function', () => {
+            Task.findById.mockResolvedValue(mockTask);
 
-    it('should render task-detail view with task', async () => {
-      const mockTask = { _id: '12', name: 'Task 1', dueDate: '2023-12-20' };
+            const mockRender = jest.fn();
+            const mockRes = {
+                render: mockRender,
+            };
 
-      Task.findById.mockResolvedValue(mockTask);
+            const mockReq = {
+                params: { taskId: mockTask._id },
+            };
 
-      const mockRender = jest.fn();
-      const mockRes = {
-        render: mockRender,
-      };
+            await getTask(mockReq, mockRes);
 
-      const mockReq = {
-        params: { taskId: mockTask._id },
-      };
+            expect(Task.findById).toHaveBeenCalledWith(mockTask._id);
+            expect(mockRender).toHaveBeenCalledWith('task-detail', {
+                task: mockTask,
+            });
+        });
 
-      await getTask(mockReq, mockRes);
+        it('should render task view with task when no task', async () => {
+            Task.findById.mockResolvedValue(null);
 
-      expect(Task.findById).toHaveBeenCalledWith(mockTask._id);
-      expect(mockRender).toHaveBeenCalledWith('task-detail', {
-        task: mockTask,
-      });
+            const mockRes = {
+                redirect: jest.fn(),
+            };
+
+            const mockReq = {
+                params: { taskId: 'not-exist' },
+            };
+
+            await getTask(mockReq, mockRes);
+
+            expect(mockRes.redirect).toHaveBeenCalledWith('/task');
+        });
+
+        it('should catch the error with getTask', async () => {
+            Task.findById.mockRejectedValue(null);
+
+            const mockReq = {
+                params: { taskId: 'not-exist' },
+            };
+            const mockNext = jest.fn();
+
+            await getTask(mockReq, {}, mockNext);
+            expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+            expect(Task.findById).toHaveBeenCalled();
+        });
     });
 
-    it('should render task view with task when no task', async () => {
-      Task.findById.mockResolvedValue(null);
+    describe('test deleteTask function', () => {
+        it('should delete a task and redirect', async () => {
+            const mockTaskId = '12';
 
-      const mockRes = {
-        redirect: jest.fn(),
-      };
+            Task.deleteById.mockResolvedValue();
 
-      const mockReq = {
-        params: { taskId: 'not-exist' },
-      };
+            const mockReq = {
+                body: { taskId: mockTaskId },
+            };
+            const mockRes = {
+                redirect: jest.fn(),
+            };
 
-      await getTask(mockReq, mockRes);
+            await deleteTask(mockReq, mockRes);
 
-      expect(mockRes.redirect).toHaveBeenCalledWith('/task');
+            expect(Task.deleteById).toHaveBeenCalledWith(mockTaskId);
+            expect(mockRes.redirect).toHaveBeenCalledWith('/task');
+        });
+
+        it('should catch the error with deleteTask', async () => {
+            const mockTaskId = '12';
+
+            Task.deleteById.mockRejectedValue();
+
+            const mockReq = {
+                body: { taskId: mockTaskId },
+            };
+
+            const mockNext = jest.fn();
+
+            await deleteTask(mockReq, {}, mockNext);
+
+            expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+            expect(Task.deleteById).toHaveBeenCalledWith(mockTaskId);
+        });
     });
 
-    it('should catch the error with getTask', async () => {
-      Task.findById.mockRejectedValue(null);
+    describe('test getEditTask function', () => {
+        it('should render edit-task view when editing a task', async () => {
+            const mockTask = {
+                _id: '12',
+                name: 'Task 1',
+                dueDate: '2023-12-20',
+            };
 
-      const mockReq = {
-        params: { taskId: 'not-exist' },
-      };
-      const  mockNext = jest.fn();
+            Task.findById.mockResolvedValue(mockTask);
 
-      await getTask(mockReq, {}, mockNext);
-      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
-      expect(Task.findById).toHaveBeenCalled();
+            const mockRender = jest.fn();
+            const mockRes = {
+                render: mockRender,
+                redirect: jest.fn(),
+            };
+            const mockReq = {
+                params: { taskId: mockTask._id },
+                query: { edit: 'true' },
+            };
+
+            await getEditTask(mockReq, mockRes);
+
+            expect(Task.findById).toHaveBeenCalledWith(mockTask._id);
+            expect(mockRender).toHaveBeenCalledWith('edit-task', {
+                editing: 'true',
+                task: mockTask,
+            });
+        });
+
+        it('should redirect when edit mode false', async () => {
+            Task.findById.mockResolvedValue(null);
+
+            const mockRender = jest.fn();
+            const mockRes = {
+                render: mockRender,
+                redirect: jest.fn(),
+            };
+            const mockReq = {
+                params: { taskId: 'nonExistentId' },
+                query: { edit: false },
+            };
+
+            await getEditTask(mockReq, mockRes);
+
+            expect(mockRes.redirect).toHaveBeenCalledWith('/task');
+        });
+
+        it('should catch the error with getEditTask', async () => {
+            const mockTaskId = 'nonExistentId';
+            Task.findById.mockRejectedValue();
+
+            const mockReq = {
+                params: { taskId: mockTaskId },
+                query: { edit: true },
+            };
+            const mockNext = jest.fn();
+
+            await getEditTask(mockReq, {}, mockNext);
+            expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+
+            expect(Task.findById).toHaveBeenCalledWith(mockTaskId);
+        });
+
+        it('should redirect when editing a non-existent task', async () => {
+            Task.findById.mockResolvedValue(null);
+
+            const mockRender = jest.fn();
+            const mockRes = {
+                render: mockRender,
+                redirect: jest.fn(),
+            };
+            const mockReq = {
+                params: { taskId: 'nonExistentId' },
+                query: { edit: 'true' },
+            };
+
+            await getEditTask(mockReq, mockRes);
+
+            expect(Task.findById).toHaveBeenCalledWith('nonExistentId');
+            expect(mockRes.redirect).toHaveBeenCalledWith('/task');
+        });
     });
 
-  });
+    describe('test postEditTask function', () => {
+        it('should update a task and redirect', async () => {
+            const mockTaskId = '12';
+            const mockTask = {
+                _id: '12',
+                name: 'Updated Task',
+                dueDate: '2023-12-21',
+            };
 
-  describe('test deleteTask function', () => {
+            const mockSave = jest.fn();
 
-    it('should delete a task and redirect', async () => {
-      const mockTaskId = '12';
+            Task.mockImplementation(() => {
+                return {
+                    save: mockSave,
+                };
+            });
 
-      Task.deleteById.mockResolvedValue();
+            mockSave.mockResolvedValue(mockTask);
 
-      const mockReq = {
-        body: { taskId: mockTaskId },
-      };
-      const mockRes = {
-        redirect: jest.fn(),
-      };
+            const mockReq = {
+                body: {
+                    taskId: mockTaskId,
+                    name: 'Task',
+                    dueDate: '2023-12-21',
+                },
+            };
+            const mockRes = {
+                redirect: jest.fn(),
+            };
 
-      await deleteTask(mockReq, mockRes);
+            await postEditTask(mockReq, mockRes);
 
-      expect(Task.deleteById).toHaveBeenCalledWith(mockTaskId);
-      expect(mockRes.redirect).toHaveBeenCalledWith('/task');
+            expect(mockSave).toHaveBeenCalled();
+            expect(mockRes.redirect).toHaveBeenCalledWith('/task');
+        });
+
+        it('should catch the error with postEditTask', async () => {
+            const mockTaskId = '12';
+            const mockTask = {
+                _id: '12',
+                name: 'Updated Task',
+                dueDate: '2023-12-21',
+            };
+            const task = new Task(mockTask);
+
+            Task.mockImplementation(() => task);
+
+            task.save.mockRejectedValue(mockTask);
+
+            const mockReq = {
+                body: {
+                    taskId: mockTaskId,
+                    name: 'Task',
+                    dueDate: '2023-12-21',
+                },
+            };
+
+            const mockNext = jest.fn();
+
+            await postEditTask(mockReq, {}, mockNext);
+
+            expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+            expect(task.save).toHaveBeenCalled();
+        });
     });
 
-    it('should catch the error with deleteTask', async () => {
-      const mockTaskId = '12';
+    describe('test getAddTask function', () => {
+        it('should render edit-task view for adding a task', async () => {
+            const mockRender = jest.fn();
+            const mockRes = {
+                render: mockRender,
+            };
 
-      Task.deleteById.mockRejectedValue();
+            await getAddTask({}, mockRes);
 
-      const mockReq = {
-        body: { taskId: mockTaskId },
-      };
-
-      const  mockNext = jest.fn();
-
-      await deleteTask(mockReq, {}, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
-      expect(Task.deleteById).toHaveBeenCalledWith(mockTaskId);
+            expect(mockRender).toHaveBeenCalledWith('edit-task');
+        });
     });
 
-  });
+    describe('test postAddTask function', () => {
+        it('should create a new task and redirect', async () => {
+            const mockTask = { name: 'new Task', dueDate: '2023-12-21' };
+            const task = new Task(mockTask);
 
-  describe('test getEditTask function', () => {
+            Task.mockImplementation(() => task);
 
-    it('should render edit-task view when editing a task', async () => {
-      const mockTask = { _id: '12', name: 'Task 1', dueDate: '2023-12-20' };
+            task.save.mockResolvedValue(mockTask);
 
-      Task.findById.mockResolvedValue(mockTask);
+            const mockReq = {
+                body: mockTask,
+            };
+            const mockRes = {
+                redirect: jest.fn(),
+            };
 
-      const mockRender = jest.fn();
-      const mockRes = {
-        render: mockRender,
-        redirect: jest.fn(),
-      };
-      const mockReq = {
-        params: { taskId: mockTask._id },
-        query: { edit: 'true' },
-      };
+            await postAddTask(mockReq, mockRes);
 
-      await getEditTask(mockReq, mockRes);
+            expect(task.save).toHaveBeenCalled();
+            expect(mockRes.redirect).toHaveBeenCalledWith('/task');
+        });
 
-      expect(Task.findById).toHaveBeenCalledWith(mockTask._id);
-      expect(mockRender).toHaveBeenCalledWith('edit-task', {
-        editing: 'true',
-        task: mockTask,
-      });
+        it('should catch the error with postAddTask', async () => {
+            const mockTask = { name: 'new Task', dueDate: '2023-12-21' };
+            const task = new Task(mockTask);
+
+            Task.mockImplementation(() => task);
+
+            task.save.mockRejectedValue(mockTask);
+
+            const mockReq = {
+                body: mockTask,
+            };
+
+            const mockNext = jest.fn();
+
+            await postAddTask(mockReq, {}, mockNext);
+            expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+
+            expect(task.save).toHaveBeenCalled();
+        });
     });
-
-    it('should redirect when edit mode false', async () => {
-      Task.findById.mockResolvedValue(null);
-
-      const mockRender = jest.fn();
-      const mockRes = {
-        render: mockRender,
-        redirect: jest.fn(),
-      };
-      const mockReq = {
-        params: { taskId: 'nonExistentId' },
-        query: { edit: false },
-      };
-
-      await getEditTask(mockReq, mockRes);
-
-      expect(mockRes.redirect).toHaveBeenCalledWith('/task');
-    });
-
-    it('should catch the error with getEditTask', async () => {
-      const mockTaskId = 'nonExistentId';
-      Task.findById.mockRejectedValue();
-
-      const mockReq = {
-        params: { taskId: mockTaskId },
-        query: { edit: true },
-      };
-      const  mockNext = jest.fn();
-
-      await getEditTask(mockReq, {}, mockNext);
-      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
-
-      expect(Task.findById).toHaveBeenCalledWith(mockTaskId);
-    });
-
-    it('should redirect when editing a non-existent task', async () => {
-      Task.findById.mockResolvedValue(null);
-
-      const mockRender = jest.fn();
-      const mockRes = {
-        render: mockRender,
-        redirect: jest.fn(),
-      };
-      const mockReq = {
-        params: { taskId: 'nonExistentId' },
-        query: { edit: 'true' },
-      };
-
-      await getEditTask(mockReq, mockRes);
-
-      expect(Task.findById).toHaveBeenCalledWith('nonExistentId');
-      expect(mockRes.redirect).toHaveBeenCalledWith('/task');
-    });
-
-  });
-
-  describe('test postEditTask function', () => {
-
-    it('should update a task and redirect', async () => {
-      const mockTaskId = '12';
-      const mockTask = {
-        _id: '12',
-        name: 'Updated Task',
-        dueDate: '2023-12-21',
-      };
-
-      const mockSave = jest.fn();
-
-      Task.mockImplementation(() => {
-        return {
-          save: mockSave,
-        };
-      });
-
-      mockSave.mockResolvedValue(mockTask);
-
-      const mockReq = {
-        body: { taskId: mockTaskId, name: 'Task', dueDate: '2023-12-21' },
-      };
-      const mockRes = {
-        redirect: jest.fn(),
-      };
-
-      await postEditTask(mockReq, mockRes);
-
-      expect(mockSave).toHaveBeenCalled();
-      expect(mockRes.redirect).toHaveBeenCalledWith('/task');
-    });
-
-    it('should catch the error with postEditTask', async () => {
-      const mockTaskId = '12';
-      const mockTask = {
-        _id: '12',
-        name: 'Updated Task',
-        dueDate: '2023-12-21',
-      };
-      const task = new Task(mockTask);
-
-      Task.mockImplementation(() => task);
-
-      task.save.mockRejectedValue(mockTask);
-
-      const mockReq = {
-        body: { taskId: mockTaskId, name: 'Task', dueDate: '2023-12-21' },
-      };
-
-      const  mockNext = jest.fn();
-
-      await postEditTask(mockReq, {}, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
-      expect(task.save).toHaveBeenCalled();
-    });
-
-  });
-
-  describe('test getAddTask function', () => {
-
-    it('should render edit-task view for adding a task', async () => {
-      const mockRender = jest.fn();
-      const mockRes = {
-        render: mockRender,
-      };
-
-      await getAddTask({}, mockRes);
-
-      expect(mockRender).toHaveBeenCalledWith('edit-task');
-    });
-
-  });
-
-  describe('test postAddTask function', () => {
-
-    it('should create a new task and redirect', async () => {
-      const mockTask = { name: 'new Task', dueDate: '2023-12-21' };
-      const task = new Task(mockTask);
-
-      Task.mockImplementation(() => task);
-
-      task.save.mockResolvedValue(mockTask);
-
-      const mockReq = {
-        body: mockTask,
-      };
-      const mockRes = {
-        redirect: jest.fn(),
-      };
-
-      await postAddTask(mockReq, mockRes);
-
-      expect(task.save).toHaveBeenCalled();
-      expect(mockRes.redirect).toHaveBeenCalledWith('/task');
-    });
-
-    it('should catch the error with postAddTask', async () => {
-      const mockTask = { name: 'new Task', dueDate: '2023-12-21' };
-      const task = new Task(mockTask);
-
-      Task.mockImplementation(() => task);
-
-      task.save.mockRejectedValue(mockTask);
-
-      const mockReq = {
-        body: mockTask,
-      };
-
-      const  mockNext = jest.fn();
-
-      await postAddTask(mockReq, {}, mockNext);
-      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
-
-      expect(task.save).toHaveBeenCalled();
-    });
-  });
-
 });
