@@ -1,4 +1,4 @@
-import configurationService from './ configuration-service.js';
+import configurationService from './data/ configuration-service.js';
 import Task from '../models/task.js';
 import { mongoConnect } from '../util/database.js';
 

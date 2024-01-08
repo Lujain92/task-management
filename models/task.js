@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
-import { getDb } from '../util/database.js';
+import collections from '../util/data/collections.js';
+import { getCollection } from '../util/database.js';
 
 class Task {
     /**
@@ -23,16 +24,19 @@ class Task {
      */
     async save() {
         try {
-            const db = getDb();
-            await db
-                .collection('task')
-                .createIndex({ name: 1 }, { unique: true });
+            getCollection(collections.taskCollection).createIndex(
+                { name: 1 },
+                { unique: true },
+            );
 
-            const dbOp = this._id
-                ? await db
-                      .collection('task')
-                      .updateOne({ _id: this._id }, { $set: this })
-                : await db.collection('task').insertOne(this);
+            this._id
+                ? getCollection(collections.taskCollection).updateOne(
+                      { _id: this._id },
+                      { $set: this },
+                  )
+                : await getCollection(collections.taskCollection).insertOne(
+                      this,
+                  );
         } catch (err) {
             console.error(err);
             throw err;
@@ -45,8 +49,9 @@ class Task {
      */
     static async fetchAll() {
         try {
-            const db = getDb();
-            const tasks = await db.collection('task').find().toArray();
+            const tasks = await getCollection(collections.taskCollection)
+                .find()
+                .toArray();
             return tasks;
         } catch (err) {
             console.error(err);
@@ -60,9 +65,7 @@ class Task {
      */
     static async findById(taskId) {
         try {
-            const db = getDb();
-            const task = await db
-                .collection('task')
+            const task = await getCollection(collections.taskCollection)
                 .find({ _id: new ObjectId(taskId) })
                 .next();
             return task;
@@ -78,10 +81,9 @@ class Task {
      */
     static async deleteById(taskId) {
         try {
-            const db = getDb();
-            await db
-                .collection('task')
-                .deleteOne({ _id: new ObjectId(taskId) });
+            await getCollection(collections.taskCollection).deleteOne({
+                _id: new ObjectId(taskId),
+            });
         } catch (err) {
             console.error(err);
         }

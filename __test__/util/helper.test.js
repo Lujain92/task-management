@@ -17,7 +17,7 @@ describe('overDueTask', () => {
     });
 
     it('should return false if the task is checked and not overdue', () => {
-        const result = overDueTask(false, '2023-12-01');
+        const result = overDueTask(true, '2023-12-01');
         expect(result).toBe(false);
     });
 });

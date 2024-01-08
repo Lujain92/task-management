@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import configurationService from './util/ configuration-service.js';
+import configurationService from './util/data/ configuration-service.js';
 import get404 from './controllers/error.js';
 import taskRoutes from './routes/task.js';
 import { mongoConnect } from './util/database.js';

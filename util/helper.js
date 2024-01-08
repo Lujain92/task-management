@@ -4,17 +4,7 @@
  * @param {string} dueDate - The due date of the task in string format.
  * @returns {boolean} Returns true if the task is overdue, otherwise false.
  */
-const overDueTask = (checked, dueDate, errorMessage) => {
-    if (
-        (checked === undefined || checked === null) &&
-        new Date(dueDate) < new Date()
-    ) {
-        return true;
-    }
-    return false;
-};
-
-// const overDueTask = (checked, dueDate) => (checked ?? true) && new Date(dueDate) < new Date();
+const overDueTask = (checked, dueDate) => !checked && new Date(dueDate) < new Date();
 
 /**
  * Handles errors by logging and formatting error information before passing it to the 'next' function.

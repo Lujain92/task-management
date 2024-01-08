@@ -1,5 +1,5 @@
 import { MongoClient } from 'mongodb';
-import configurationService from './ configuration-service.js';
+import configurationService from './data/ configuration-service.js';
 
 let _db;
 
@@ -32,4 +32,17 @@ const getDb = () => {
     throw 'No database found!';
 };
 
-export { getDb, mongoConnect };
+/**
+ * Retrieves a collection from the database.
+ * @param {string} name - The name of the collection to retrieve.
+ * @returns {Collection} The database collection.
+ * @throws {string} Throws an error if no database is found.
+ */
+const getCollection = (name) => {
+    if (_db) {
+        return _db.collection(name);
+    }
+    throw 'No database found!';
+};
+
+export { getCollection, getDb, mongoConnect };
