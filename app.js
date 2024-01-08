@@ -8,6 +8,7 @@ import { mongoConnect } from './util/database.js';
 
 const app = express();
 const port = configurationService.PORT || 3000;
+
 app.set('view engine', 'pug');
 app.set('views', 'views');
 

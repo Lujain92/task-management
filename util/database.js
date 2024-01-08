@@ -40,6 +40,7 @@ const getDb = () => {
  */
 const getCollection = (name) => {
     if (_db) {
+        console.log(_db,"rr")
         return _db.collection(name);
     }
     throw 'No database found!';

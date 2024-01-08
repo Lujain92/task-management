@@ -1,8 +1,8 @@
-import { getDb } from '../../util/database.js';
+import { getCollection } from '../../util/database.js';
 import Task from '../../models/task.js';
 
 jest.mock('../../util/database', () => ({
-    getDb: jest.fn(),
+    getCollection: jest.fn(),
 }));
 
 jest.mock('mongodb', () => ({
@@ -21,11 +21,7 @@ describe('Task', () => {
                 insertOne: jest.fn(),
             };
 
-            mockDb = {
-                collection: jest.fn(() => mockCollection),
-            };
-
-            getDb.mockReturnValue(mockDb);
+            getCollection.mockReturnValue(mockCollection);
         });
 
         afterEach(() => {
@@ -65,13 +61,11 @@ describe('Task', () => {
             const insertOneMock = jest
                 .fn()
                 .mockResolvedValue({ insertedCount: 1 });
-            const collectionMock = jest
-                .fn()
-                .mockReturnValue({
-                    insertOne: insertOneMock,
-                    createIndex: createIndexMock,
-                });
-            getDb.mockReturnValue({ collection: collectionMock });
+
+            getCollection.mockReturnValue({
+                insertOne: insertOneMock,
+                createIndex: createIndexMock,
+            });
 
             const newTask = new Task({
                 title: 'New Task',
@@ -84,8 +78,7 @@ describe('Task', () => {
                 { unique: true },
             );
 
-            expect(getDb).toHaveBeenCalled();
-            expect(collectionMock).toHaveBeenCalledWith('task');
+            expect(getCollection).toHaveBeenCalled();
             expect(insertOneMock).toHaveBeenCalledWith(newTask);
         });
     });
@@ -100,16 +93,13 @@ describe('Task', () => {
             const findMock = jest
                 .fn()
                 .mockReturnValue({ toArray: toArrayMock });
-            const collectionMock = jest
-                .fn()
-                .mockReturnValue({ find: findMock });
-            // getDb.mockReturnValue({ collection: collectionMock });
+
+            getCollection.mockReturnValue({ find: findMock });
 
             const tasks = await Task.fetchAll();
 
             expect(tasks).toEqual(mockTasks);
-            // expect(getDb).toHaveBeenCalled();
-            // expect(collectionMock).toHaveBeenCalledWith('task');
+            expect(getCollection).toHaveBeenCalled();
             expect(findMock).toHaveBeenCalled();
             expect(toArrayMock).toHaveBeenCalled();
         });
@@ -120,16 +110,13 @@ describe('Task', () => {
             const findMock = jest
                 .fn()
                 .mockReturnValue({ toArray: toArrayMock });
-            const collectionMock = jest
-                .fn()
-                .mockReturnValue({ find: findMock });
-            getDb.mockReturnValue({ collection: collectionMock });
+
+            getCollection.mockReturnValue({ find: findMock });
 
             const tasks = await Task.fetchAll();
 
             expect(tasks).toBeUndefined();
-            expect(getDb).toHaveBeenCalled();
-            expect(collectionMock).toHaveBeenCalledWith('task');
+            expect(getCollection).toHaveBeenCalled();
             expect(findMock).toHaveBeenCalled();
             expect(toArrayMock).toHaveBeenCalled();
         });
@@ -138,21 +125,15 @@ describe('Task', () => {
     describe('findById()', () => {
         it('should find a task by ID', async () => {
             const mockTask = { _id: 'someId', title: 'Task 1' };
-            const findMock = jest
-                .fn()
-                .mockReturnValue({
-                    next: jest.fn().mockResolvedValue(mockTask),
-                });
-            const collectionMock = jest
-                .fn()
-                .mockReturnValue({ find: findMock });
-            getDb.mockReturnValue({ collection: collectionMock });
+            const findMock = jest.fn().mockReturnValue({
+                next: jest.fn().mockResolvedValue(mockTask),
+            });
+            getCollection.mockReturnValue({ find: findMock });
 
             const foundTask = await Task.findById('someId');
 
             expect(foundTask).toEqual(mockTask);
-            expect(getDb).toHaveBeenCalled();
-            expect(collectionMock).toHaveBeenCalledWith('task');
+            expect(getCollection).toHaveBeenCalled();
             expect(findMock).toHaveBeenCalledWith({ _id: { $oid: 'someId' } });
         });
 
@@ -160,36 +141,26 @@ describe('Task', () => {
             const findMock = jest
                 .fn()
                 .mockReturnValue({ next: jest.fn().mockResolvedValue(null) });
-            const collectionMock = jest
-                .fn()
-                .mockReturnValue({ find: findMock });
-            getDb.mockReturnValue({ collection: collectionMock });
+            getCollection.mockReturnValue({ find: findMock });
 
             const foundTask = await Task.findById('nonExistentId');
 
             expect(foundTask).toBeNull();
-            expect(getDb).toHaveBeenCalled();
-            expect(collectionMock).toHaveBeenCalledWith('task');
+            expect(getCollection).toHaveBeenCalled();
             expect(findMock).toHaveBeenCalledWith({ _id: expect.any(Object) });
         });
 
         it('should handle errors from the database', async () => {
             const dbError = new Error('Database error');
-            const findMock = jest
-                .fn()
-                .mockReturnValue({
-                    next: jest.fn().mockRejectedValue(dbError),
-                });
-            const collectionMock = jest
-                .fn()
-                .mockReturnValue({ find: findMock });
-            getDb.mockReturnValue({ collection: collectionMock });
+            const findMock = jest.fn().mockReturnValue({
+                next: jest.fn().mockRejectedValue(dbError),
+            });
+            getCollection.mockReturnValue({ find: findMock });
 
             const foundTask = await Task.findById('someId');
 
             expect(foundTask).toBeUndefined();
-            expect(getDb).toHaveBeenCalled();
-            expect(collectionMock).toHaveBeenCalledWith('task');
+            expect(getCollection).toHaveBeenCalled();
             expect(findMock).toHaveBeenCalledWith({ _id: expect.any(Object) });
         });
     });
@@ -199,33 +170,24 @@ describe('Task', () => {
             const deleteOneMock = jest
                 .fn()
                 .mockResolvedValue({ deletedCount: 1 });
-            const collectionMock = jest
-                .fn()
-                .mockReturnValue({ deleteOne: deleteOneMock });
-            getDb.mockReturnValue({ collection: collectionMock });
+
+            getCollection.mockReturnValue({ deleteOne: deleteOneMock });
 
             await Task.deleteById('someId');
 
-            expect(getDb).toHaveBeenCalled();
-            expect(collectionMock).toHaveBeenCalledWith('task');
+            expect(getCollection).toHaveBeenCalled();
             expect(deleteOneMock).toHaveBeenCalledWith({
                 _id: { $oid: 'someId' },
             });
         });
 
         it('should handle deletion failure', async () => {
-            const deleteOneMock = jest
-                .fn()
-                .mockResolvedValue({ deletedCount: 0 });
-            const collectionMock = jest
-                .fn()
-                .mockReturnValue({ deleteOne: deleteOneMock });
-            getDb.mockReturnValue({ collection: collectionMock });
+            const deleteOneMock = jest.fn();
+            getCollection.mockReturnValue({ deleteOne: deleteOneMock });
 
             await Task.deleteById('nonExistentId');
 
-            expect(getDb).toHaveBeenCalled();
-            expect(collectionMock).toHaveBeenCalledWith('task');
+            expect(getCollection).toHaveBeenCalled();
             expect(deleteOneMock).toHaveBeenCalledWith({
                 _id: { $oid: 'nonExistentId' },
             });
@@ -234,15 +196,11 @@ describe('Task', () => {
         it('should handle errors during deletion', async () => {
             const dbError = new Error('Deletion error');
             const deleteOneMock = jest.fn().mockRejectedValue(dbError);
-            const collectionMock = jest
-                .fn()
-                .mockReturnValue({ deleteOne: deleteOneMock });
-            getDb.mockReturnValue({ collection: collectionMock });
+            getCollection.mockReturnValue({ deleteOne: deleteOneMock });
 
             await Task.deleteById('someId');
 
-            expect(getDb).toHaveBeenCalled();
-            expect(collectionMock).toHaveBeenCalledWith('task');
+            expect(getCollection).toHaveBeenCalled();
             expect(deleteOneMock).toHaveBeenCalledWith({
                 _id: { $oid: 'someId' },
             });
